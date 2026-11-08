@@ -1,12 +1,31 @@
 
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
-from aiogram.filters import Command
+from aiogram.filters import Command, CommandStart
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 router = Router()
+
+
+# Команда /start
+@router.message(CommandStart())
+async def cmd_start(message: Message):
+    name = message.from_user.first_name
+    await message.answer(f"Привет, {name}!")
+
+
+# Команда /help
+@router.message(Command("help"))
+async def cmd_help(message: Message):
+    await message.answer(
+        "Доступные команды:\n\n"
+        "/start — приветствие\n"
+        "/help — список команд\n"
+        "/register — регистрация\n"
+        "/profile — просмотр профиля"
+    )
 
 # Хранилище пользователей
 users_data = {}
@@ -70,7 +89,7 @@ async def get_age(message: Message, state: FSMContext):
 
 
 # Подтверждение регистрации
-@router.callback_query(F.data == "confirm")
+@router.callback_query(Registration.confirmation, F.data == "confirm")
 async def confirm_registration(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
 
@@ -90,7 +109,7 @@ async def confirm_registration(callback: CallbackQuery, state: FSMContext):
 
 
 # Отмена регистрации
-@router.callback_query(F.data == "cancel")
+@router.callback_query(Registration.confirmation, F.data == "cancel")
 async def cancel_registration(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text("❌ Регистрация отменена.")
     await callback.answer()
