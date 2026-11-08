@@ -1,17 +1,19 @@
 
 import asyncio
+import os
+
 from aiogram import Bot, Dispatcher
 from dotenv import load_dotenv
-import os
 
 from handlers import router
 
 
 load_dotenv(dotenv_path=".env", override=True)
-print("Токен загружен:", bool(os.getenv("BOT_TOKEN")))
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
+if not BOT_TOKEN:
+    raise ValueError("Не найден BOT_TOKEN в файле .env")
 
 
 async def main():
